@@ -1,74 +1,78 @@
-var el={};
-var qs={};
-var lang = 'ta-IN';
-var colors = {'success':'#2ecc40', 'warning':'#ffdc00', 'error':'#ff4136', 'default':'#0074d9'};
+var G = {'t2t': talk2text, 'l':['ta-IN', 'தமிழ்'], 'dbg':false};
 
-var onklick = function(evt) {
-  if (!talk2text.isListening()) {
-    hdr(' starting...', colors.warning);
-    talk2text.start({"autoRestart":true, "language":lang, "callback": cb});
-  } else {
-    talk2text.stop();
-  }
+window.addEventListener('load', function() {
+
+G.fH = function(s,c) {
+  G.h.style.background = c || '#0074d9';
+  G.h.innerText = G.l[1] + ' ' + s;
 }
 
-var onresize = function(evt) {
-  el.txt.style.height = window.innerHeight - el.hdr.clientHeight + 'px';
-  el.txt.focus();
+G.fR = function(e) {
+  G.t.style.height = window.innerHeight - G.h.clientHeight + 'px';
+  G.t.focus();
 }
 
-var hdr = function(txt,bgcolor) {
-  el.hdr.style.background = bgcolor || colors.default;
-  el.hdr.innerText = languages[lang] + ' ' + txt;
-}
-
-var cb = function(type, data) {
-  if (qs.debug) { console.log(type, data); }
-  switch(type) {
+G.cb = function(t, d) {
+  if (G.dbg) { console.log(t, d); }
+  switch(t) {
     case 'onstart':
       break;
     case 'onend':
-      if (talk2text.lastError()) {
-        hdr(' klick2start');
-      }
+      if (G.t2t.lastError()) { G.fH(' klick2start'); }
       break;
     case 'onsoundstart':
-      hdr(' talk2text', colors.success);
+      G.fH(' talk2text', '#2ecc40');
       break;
     case 'onerror':
-      hdr(data, colors.error);
+      G.fH(d, '#ff4136');
       break;
     case 'onresult':
-      var w = data[0];
-      var v = el.txt.value;
-      //insert in cursor position or replace selected text
-      el.txt.value = v.slice(0, el.txt.selectionStart) + w + v.slice(el.txt.selectionEnd);
-      el.txt.focus();
+      if (d.length) {
+        var w = d[0];
+        var v = G.t.value;
+        //insert in cursor position or replace selected text
+        G.t.value = v.slice(0, G.t.selectionStart) + w + v.slice(G.t.selectionEnd);
+        G.t.focus();
+      }
       break;
-    default: console.log(type, data);
+    default: console.log(t, d);
   }
 }
 
-var languages = talk2text.getLanguages();
-
-var main = function() {
-  el.hdr = document.createElement('div');
-  el.hdr.className = 'hdr';
-  el.hdr.addEventListener('click', onklick, false);
-  document.body.appendChild(el.hdr);
-
-  el.txt = document.createElement('textarea');
-  el.txt.addEventListener('resize', onresize, false);
-  document.body.appendChild(el.txt);
-
-  qs = function() {
-    var m = {};
-    (window.location.search || '?').substr(1).replace(/([^&=]+)=?([^&]*)(?:&+|$)/g, function(match, k, v) {m[k] = v;});
-    return m;
-  }();
-  if (languages[qs.lang]) { lang = qs.lang; }
-  hdr('klick2start');
-  onresize();
-  onklick();
+var qs = function() {
+  var m = {};
+  (window.location.search || '?').substr(1).replace(/([^&=]+)=?([^&]*)(?:&+|$)/g, function(match, k, v) {m[k] = v;});
+  return m;
+}();
+G.dbg = qs.debug || false;
+var langs = G.t2t.getLanguages();
+if (langs[qs.lang]) { 
+  G.l[0] = qs.lang;
+  G.l[1] = langs[qs.lang];
 }
-window.addEventListener('load', main, false);
+
+// create document elements and assign event-handlers for them
+e = document.createElement('div');
+e.className = 'h';
+e.addEventListener('click', function() {
+  if (!G.t2t.isListening()) {
+    G.fH(' starting...', '#ffdc00');
+    G.t2t.start({"language":G.l[0], "callback": G.cb});
+  } else {
+    G.t2t.stop();
+  }
+}, false);
+document.body.appendChild(e);
+G.h = e;
+
+e = document.createElement('textarea');
+e.addEventListener('resize', G.fR, false);
+document.body.appendChild(e);
+G.t = e;
+
+// set initial-title, resize to set textarea height, and autostart
+G.fH('klick2start');
+G.fR();
+G.h.click();
+
+});

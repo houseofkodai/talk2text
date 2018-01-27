@@ -1,5 +1,5 @@
 //! talk2text
-//! version : 0.1
+//! version : 0.2
 //! author  : Karthik Ayyar <karthik@houseofkodai.in>>
 //! license : MIT
 //! website : https://houseofkodai.in/
@@ -34,112 +34,20 @@
     return null;
   }
 
-  var _languages = {"af-ZA": "Afrikaans",
-    "am-ET": "አማርኛ",
-    "az-AZ": "Azərbaycanca",
-    "bn-BD": "বাংলা-বাংলাদেশ",
+  var _languages = {
+    "en-US": "English",
     "bn-IN": "বাংলা-ভারত",
-    "id-ID": "Bahasa Indonesia",
-    "ms-MY": "Bahasa Melayu",
-    "ca-ES": "Català",
-    "cs-CZ": "Čeština",
-    "da-DK": "Dansk",
-    "de-DE": "Deutsch",
-    "en-AU": "English-Australia",
-    "en-CA": "English-Canada",
-    "en-IN": "English-India",
-    "en-KE": "English-Kenya",
-    "en-TZ": "English-Tanzania",
-    "en-GH": "English-Ghana",
-    "en-NZ": "English-New Zealand",
-    "en-NG": "English-Nigeria",
-    "en-ZA": "English-South Africa",
-    "en-PH": "English-Philippines",
-    "en-GB": "English-United Kingdom",
-    "en-US": "English-United States",
-    "es-AR": "Español-Argentina",
-    "es-BO": "Español-Bolivia",
-    "es-CL": "Español-Chile",
-    "es-CO": "Español-Colombia",
-    "es-CR": "Español-Costa Rica",
-    "es-EC": "Español-Ecuador",
-    "es-SV": "Español-El Salvador",
-    "es-ES": "Español-España",
-    "es-US": "Español-Estados Unidos",
-    "es-GT": "Español-Guatemala",
-    "es-HN": "Español-Honduras",
-    "es-MX": "Español-México",
-    "es-NI": "Español-Nicaragua",
-    "es-PA": "Español-Panamá",
-    "es-PY": "Español-Paraguay",
-    "es-PE": "Español-Perú",
-    "es-PR": "Español-Puerto Rico",
-    "es-DO": "Español-República Dominicana",
-    "es-UY": "Español-Uruguay",
-    "es-VE": "Español-Venezuela",
-    "eu-ES": "Euskara",
-    "fil-PH": "Filipino",
-    "fr-FR": "Français",
-    "jv-ID": "Basa Jawa",
-    "gl-ES": "Galego",
+    "en-IN": "English",
     "gu-IN": "ગુજરાતી",
-    "hr-HR": "Hrvatski",
-    "zu-ZA": "IsiZulu",
-    "is-IS": "Íslenska",
-    "it-IT": "Italiano-Italia",
-    "it-CH": "Italiano-Svizzera",
     "kn-IN": "ಕನ್ನಡ",
-    "km-KH": "ភាសាខ្មែរ",
-    "lv-LV": "Latviešu",
-    "lt-LT": "Lietuvių",
     "ml-IN": "മലയാളം",
     "mr-IN": "मराठी",
-    "hu-HU": "Magyar",
-    "lo-LA": "ລາວ",
-    "nl-NL": "Nederlands",
-    "ne-NP": "नेपाली भाषा",
-    "nb-NO": "Norsk bokmål",
-    "pl-PL": "Polski",
-    "pt-BR": "Português-Brasil",
-    "pt-PT": "Português-Portugal",
-    "ro-RO": "Română",
-    "si-LK": "සිංහල",
-    "sl-SI": "Slovenščina",
-    "su-ID": "Basa Sunda",
-    "sk-SK": "Slovenčina",
-    "fi-FI": "Suomi",
-    "sv-SE": "Svenska",
-    "sw-TZ": "Kiswahili-Tanzania",
-    "sw-KE": "Kiswahili-Kenya",
-    "ka-GE": "ქართული",
-    "hy-AM": "Հայերեն",
-    "ta-IN": "தமிழ்-இந்தியா",
-    "ta-SG": "தமிழ்-சிங்கப்பூர்",
-    "ta-LK": "தமிழ்-இலங்கை",
-    "ta-MY": "தமிழ்-மலேசியா",
+    "ta-IN": "தமிழ்",
     "te-IN": "తెలుగు",
-    "vi-VN": "Tiếng Việt",
-    "tr-TR": "Türkçe",
-    "ur-PK": "اُردُو-پاکستان",
     "ur-IN": "اُردُو-بھارت",
-    "el-GR": "Ελληνικά",
-    "bg-BG": "български",
-    "ru-RU": "Pусский",
-    "sr-RS": "Српски",
-    "uk-UA": "Українська",
-    "ko-KR": "한국어",
-    "cmn-Hans-CN": "中文-普通话 (中国大陆)",
-    "cmn-Hans-HK": "中文-普通话 (香港)",
-    "cmn-Hant-TW": "中文-中文 (台灣)",
-    "yue-Hant-HK": "中文-粵語 (香港)",
-    "ja-JP": "日本語",
     "hi-IN": "हिन्दी",
-    "th-TH": "ภาษาไทย"
   };
   var _isDebug = false;
-  var _lastStart = 0;
-  var _autoRestart = false;
-  var _autoRestartCount = 0;
   var _isListening = false;
   var _lastError = '';
 
@@ -156,9 +64,8 @@
 
   var _sr = new _SpeechRecognition();
   _sr.maxAlternatives = 5;
-  // In HTTPS, turn off continuous mode for faster results.
-  // In HTTP,  turn on  continuous mode for much slower results, but no repeating security notices
-  _sr.continuous = root.location.protocol === 'http:';
+  _sr.continuous = true;
+  _sr.interimResults = true;
   _sr.lang = 'en-US';
   _sr.onstart = function() {
     _isListening = true;
@@ -167,19 +74,6 @@
   _sr.onend = function() {
     _isListening = false;
     _callback('onend');
-    if (_autoRestart) {
-      var timeSinceLastStart = new Date().getTime()-_lastStart;
-      _autoRestartCount += 1;
-      if (_autoRestartCount % 10 === 0) {
-        _log('Speech Recognition is repeatedly stopping and starting.');
-      }
-      //do not start more than once-per-second
-      if (timeSinceLastStart < 1000) {
-        setTimeout(function() {_sr.start();}, 1000-timeSinceLastStart);
-      } else {
-        _sr.start();
-      }
-    }
   };
   _sr.onsoundstart = function() {
     _callback('onsoundstart');
@@ -188,13 +82,11 @@
     if (_isListening) {
       _lastError = '- ' + evt.error;
       if (('not-allowed' == evt.error) || ('service-not-allowed' == evt.error)) {
-        //if no-permession for mic, then disable autoRestart
-        _autoRestart = false;
         // determine if permission was denied by user or automatically.
         if ((new Date().getTime()-_lastStart) < 200) {
-          _lastError = '-not-allowed-system';
+          _lastError = 'service-not-allowed-system';
         } else {
-          _lastError = '-not-allowed-user';
+          _lastError = 'service-not-allowed-user';
         }
       }
       _callback('onerror', _lastError);
@@ -202,12 +94,18 @@
   };
   _sr.onresult = function(evt) {
     // Map the results to an array
-    var r = evt.results[evt.resultIndex];
     var results = [];
-    for (var k=0; k<r.length; k++) {
-      results[k] = r[k].transcript;
+    for (var i = evt.resultIndex; i < evt.results.length; ++i) {
+      var r = evt.results[i];
+      if (r.isFinal) {
+        for (var j=0; j<r.length; j++) {
+          results.push(r[j].transcript);
+        }
+      }
     }
-    _callback('onresult', results)
+    if (results.length) {
+      _callback('onresult', results);
+    }
   };
 
   return {
@@ -268,16 +166,13 @@
      *
      * Receives an optional options object which supports the following options:
      *
-     * - `autoRestart`  (boolean, default: true) restart itself on silence or window conflicts?
      * - `callback`     {Function} The function to call when events occur.
      * - `language`     (string, default: en-US) The language to use for translation.
      *
      * #### Examples:
      * ````javascript
-     * // Start listening, don't restart automatically
-     * talk2text.start({ autoRestart: true });
-     * // Start listening, don't restart automatically, stop recognition after first phrase recognized
-     * talk2text.start({ autoRestart: true, callback: function(type, data) {console.log(type, data)}; });
+     * // Start listening in en-US
+     * talk2text.start({ callback: function(type, data) {console.log(type, data)}; });
      * ````
      * @param {Object} [options] - Optional options.
      * @method start
@@ -291,17 +186,13 @@
       if (options.callback !== undefined && typeof options.callback === 'function') {
         _callback = options.callback;
       }
-      if (options.autoRestart !== undefined) {
-        _autoRestart = !!options.autoRestart;
-      } else {
-        _autoRestart = true;
+      if (options.continuous !== undefined) {
+        _sr.continuous = !!options.continuous;
       }
       if (options.language !== undefined && _languages[options.language]) {
         _sr.lang = options.language;
       }
 
-      _lastError = '';
-      _lastStart = new Date().getTime();
       try {
         _sr.start();
       } catch(e) {
@@ -328,8 +219,6 @@
      */
     stop: function() {
       if (_sr) {
-        _autoRestart = false;
-        _autoRestartCount = 0;
         _lastError = '';
         _sr.abort();
       }
